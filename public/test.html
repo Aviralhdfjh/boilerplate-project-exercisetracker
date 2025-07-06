@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Tracker Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exercise Tracker API Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Create User</h2>
+        <input type="text" id="username" placeholder="Username">
+        <button onclick="createUser()">Create User</button>
+        <div id="createResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Get All Users</h2>
+        <button onclick="getUsers()">Get All Users</button>
+        <div id="usersResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Add Exercise</h2>
+        <input type="text" id="userId" placeholder="User ID">
+        <input type="text" id="description" placeholder="Description">
+        <input type="number" id="duration" placeholder="Duration (minutes)">
+        <input type="date" id="date" placeholder="Date">
+        <button onclick="addExercise()">Add Exercise</button>
+        <div id="exerciseResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Get Exercise Log</h2>
+        <input type="text" id="logUserId" placeholder="User ID">
+        <input type="date" id="from" placeholder="From date">
+        <input type="date" id="to" placeholder="To date">
+        <input type="number" id="limit" placeholder="Limit">
+        <button onclick="getLog()">Get Exercise Log</button>
+        <div id="logResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        async function createUser() {
+            const username = document.getElementById('username').value;
+            try {
+                const response = await fetch(`${API_BASE}/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username })
+                });
+                const result = await response.json();
+                document.getElementById('createResult').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('createResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function getUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/users`);
+                const result = await response.json();
+                document.getElementById('usersResult').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('usersResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function addExercise() {
+            const userId = document.getElementById('userId').value;
+            const description = document.getElementById('description').value;
+            const duration = document.getElementById('duration').value;
+            const date = document.getElementById('date').value;
+
+            const body = { description, duration };
+            if (date) body.date = date;
+
+            try {
+                const response = await fetch(`${API_BASE}/users/${userId}/exercises`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+                const result = await response.json();
+                document.getElementById('exerciseResult').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('exerciseResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function getLog() {
+            const userId = document.getElementById('logUserId').value;
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+            const limit = document.getElementById('limit').value;
+
+            let url = `${API_BASE}/users/${userId}/logs`;
+            const params = new URLSearchParams();
+            if (from) params.append('from', from);
+            if (to) params.append('to', to);
+            if (limit) params.append('limit', limit);
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+                document.getElementById('logResult').textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                document.getElementById('logResult').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
